@@ -1,0 +1,10 @@
+dataset/
+*.csv
+__pycache__/
+*.pyc
+hf_cache/
+.cache/
+venv/
+.env/
+.DS_Store
+.idea/
