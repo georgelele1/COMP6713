@@ -101,9 +101,9 @@
   重要说明：
   - 模型原生输出 `1_star ~ 5_star`
   - 当前逻辑是：先取 5 星输出中的 argmax，再映射到三分类
-    - `1_star, 2_star -> negative`
-    - `3_star -> neutral`
-    - `4_star, 5_star -> positive`
+    - `1_star, 2_star -> negative -> 0`
+    - `3_star -> neutral -> 2`
+    - `4_star, 5_star -> positive ->1`
 
 - `baseline/models/flan_t5_baseline.py`
   FLAN-T5 baseline 推理逻辑。
