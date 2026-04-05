@@ -1,0 +1,17 @@
+如果不用微调，普通 BERT 能不能直接拿来做情感分类
+严格说：
+
+几乎不能直接做标准三分类
+除非你自己临时设计一个“非训练式分类方法”
+比如这些“勉强可用但不标准”的方案：
+
+BERT + 随机初始化分类头
+不行，输出没有意义
+BERT embedding + cosine similarity
+比如把文本向量和 negative / positive / neutral 的标签描述向量做相似度
+可以做实验，但通常效果一般
+BERT embedding + 传统分类器
+先用普通 BERT 提 embedding
+再训练一个 logistic regression / SVM
+这已经不算“纯直接推理”，而是“冻结 BERT + 训练浅层分类器”
+所以如果你说“普通 BERT 不微调，只直接推理做 sentiment 三分类”，那在标准意义上其实是做不了的。
