@@ -1,7 +1,8 @@
-﻿# Baseline inference dependencies for Windows + conda
-# Install PyTorch with pip before this file if you want the official wheel flow.
+﻿# Fine-tune BERT dependencies for Windows + conda
+# Install PyTorch first with the correct command for your CPU/GPU setup.
 
 accelerate==1.4.0
+datasets
 huggingface-hub==0.36.0
 matplotlib==3.10.1
 numpy==1.26.4
@@ -10,5 +11,6 @@ safetensors==0.5.3
 scikit-learn==1.6.1
 seaborn==0.13.2
 sentencepiece==0.2.0
+torch
 tqdm==4.67.1
 transformers==4.49.0
