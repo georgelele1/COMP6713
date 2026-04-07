@@ -4,10 +4,10 @@ import argparse
 import re
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import pandas as pd
 
 from baseline.constants import DEFAULT_SPLIT_DIR
-from baseline.data_utils import build_output_dir
 from baseline.evaluation import save_metrics_artifacts
 from baseline.models.bert_finetune import BertFineTuner
 
@@ -110,10 +110,72 @@ def build_parameter_output_name(args: argparse.Namespace) -> str:
     return "_".join(parts)
 
 
+def plot_metric(history_df: pd.DataFrame, metric_name: str, output_dir: Path) -> None:
+    plt.figure(figsize=(8, 5))
+
+    train_col = f"train_{metric_name}"
+    valid_col = f"valid_{metric_name}"
+
+    has_any = False
+
+    if train_col in history_df.columns:
+        plt.plot(history_df["epoch"], history_df[train_col], marker="o", label=train_col)
+        has_any = True
+
+    if valid_col in history_df.columns:
+        plt.plot(history_df["epoch"], history_df[valid_col], marker="o", label=valid_col)
+        has_any = True
+
+    if not has_any:
+        plt.close()
+        return
+
+    plt.xlabel("Epoch")
+    plt.ylabel(metric_name.replace("_", " ").title())
+    plt.title(f"{metric_name.replace('_', ' ').title()} over Epochs")
+    plt.grid(True, alpha=0.3)
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(output_dir / f"{metric_name}_curve.png", dpi=200)
+    plt.close()
+
+
+def plot_learning_rate(history_df: pd.DataFrame, output_dir: Path) -> None:
+    if "learning_rate" not in history_df.columns:
+        return
+
+    plt.figure(figsize=(8, 5))
+    plt.plot(history_df["epoch"], history_df["learning_rate"], marker="o")
+    plt.xlabel("Epoch")
+    plt.ylabel("Learning Rate")
+    plt.title("Learning Rate over Epochs")
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.savefig(output_dir / "learning_rate_curve.png", dpi=200)
+    plt.close()
+
+
+def plot_training_history(history_path: Path, output_dir: Path) -> None:
+    history_df = pd.read_csv(history_path)
+
+    metrics_to_plot = [
+        "loss",
+        "accuracy",
+        "macro_precision",
+        "macro_recall",
+        "macro_f1",
+    ]
+
+    for metric in metrics_to_plot:
+        plot_metric(history_df, metric, output_dir)
+
+    plot_learning_rate(history_df, output_dir)
+
+
 def main() -> None:
     args = parse_args()
 
-    print("[1/7] Loading split datasets.")
+    print("[1/8] Loading split datasets.")
     train_df = load_split_csv(args.train_path, args.max_train_samples)
     valid_df = load_split_csv(args.valid_path, args.max_valid_samples)
     test_df = load_split_csv(args.test_path, args.max_test_samples)
@@ -134,7 +196,7 @@ def main() -> None:
 
     print(f"Output directory: {output_dir}")
 
-    print("[2/7] Initializing fine-tuning model.")
+    print("[2/8] Initializing fine-tuning model.")
     trainer = BertFineTuner(
         model_name=args.model_name,
         batch_size=args.batch_size,
@@ -153,7 +215,7 @@ def main() -> None:
     print(f"Weight decay: {args.weight_decay}")
     print(f"Seed: {args.seed}")
 
-    print("[3/7] Starting fine-tuning.")
+    print("[3/8] Starting fine-tuning.")
     train_summary = trainer.train(
         train_df=train_df,
         valid_df=valid_df,
@@ -162,7 +224,16 @@ def main() -> None:
         early_stopping_patience=args.early_stopping_patience,
     )
 
-    print("[4/7] Reloading best checkpoint.")
+    history_path = Path(train_summary["history_path"])
+
+    print("[4/8] Plotting training curves.")
+    if history_path.exists():
+        plot_training_history(history_path, output_dir)
+        print(f"Training curves saved in: {output_dir}")
+    else:
+        print(f"Warning: history file not found at {history_path}")
+
+    print("[5/8] Reloading best checkpoint.")
     best_model = BertFineTuner.load(
         model_dir=checkpoint_dir,
         batch_size=args.batch_size,
@@ -171,7 +242,7 @@ def main() -> None:
         seed=args.seed,
     )
 
-    print("[5/7] Running test prediction.")
+    print("[6/8] Running test prediction.")
     predictions = best_model.predict(test_df["text"].tolist())
 
     prediction_df = pd.DataFrame(
@@ -190,7 +261,7 @@ def main() -> None:
     predictions_path = output_dir / "predictions.csv"
     prediction_df.to_csv(predictions_path, index=False, encoding="utf-8-sig")
 
-    print("[6/7] Computing metrics and exporting artifacts.")
+    print("[7/8] Computing metrics and exporting artifacts.")
     metrics = save_metrics_artifacts(
         prediction_df,
         output_dir=output_dir,
@@ -217,7 +288,7 @@ def main() -> None:
         encoding="utf-8",
     )
 
-    print("[7/7] Finished.")
+    print("[8/8] Finished.")
     print(f"Best checkpoint: {checkpoint_dir}")
     print(f"Predictions saved to: {predictions_path}")
     print("Metrics summary:")

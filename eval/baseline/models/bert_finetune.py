@@ -160,6 +160,7 @@ class BertFineTuner:
         output_dir.mkdir(parents=True, exist_ok=True)
 
         train_loader = self._build_loader(train_df, shuffle=True)
+        valid_loader = self._build_loader(valid_df, shuffle=False)
 
         optimizer = torch.optim.AdamW(
             self.model.parameters(),
@@ -182,7 +183,7 @@ class BertFineTuner:
         best_checkpoint_dir = output_dir / "best_checkpoint"
 
         for epoch in range(1, epochs + 1):
-            train_loss = self._train_one_epoch(
+            train_metrics = self._train_one_epoch(
                 train_loader=train_loader,
                 optimizer=optimizer,
                 scheduler=scheduler,
@@ -191,28 +192,41 @@ class BertFineTuner:
                 num_epochs=epochs,
             )
 
-            valid_metrics = self.evaluate(valid_df)
+            valid_metrics = self._evaluate_loader(
+                data_loader=valid_loader,
+                desc=f"Validation epoch {epoch}/{epochs}",
+            )
             valid_macro_f1 = float(valid_metrics["macro_f1"])
+            current_lr = float(optimizer.param_groups[0]["lr"])
 
             history.append(
                 {
                     "epoch": float(epoch),
-                    "train_loss": float(train_loss),
+                    "learning_rate": current_lr,
+                    "train_loss": float(train_metrics["loss"]),
+                    "train_accuracy": float(train_metrics["accuracy"]),
+                    "train_macro_precision": float(train_metrics["macro_precision"]),
+                    "train_macro_recall": float(train_metrics["macro_recall"]),
+                    "train_macro_f1": float(train_metrics["macro_f1"]),
+                    "valid_loss": float(valid_metrics["loss"]),
                     "valid_accuracy": float(valid_metrics["accuracy"]),
-                    "valid_macro_f1": float(valid_metrics["macro_f1"]),
                     "valid_macro_precision": float(valid_metrics["macro_precision"]),
                     "valid_macro_recall": float(valid_metrics["macro_recall"]),
+                    "valid_macro_f1": float(valid_metrics["macro_f1"]),
                 }
             )
 
             print(
                 f"[Epoch {epoch}/{epochs}] "
-                f"train_loss={train_loss:.4f} "
-                f"valid_accuracy={valid_metrics['accuracy']:.4f} "
-                f"valid_macro_f1={valid_metrics['macro_f1']:.4f}"
+                f"train_loss={train_metrics['loss']:.4f} "
+                f"train_acc={train_metrics['accuracy']:.4f} "
+                f"train_f1={train_metrics['macro_f1']:.4f} "
+                f"valid_loss={valid_metrics['loss']:.4f} "
+                f"valid_acc={valid_metrics['accuracy']:.4f} "
+                f"valid_f1={valid_metrics['macro_f1']:.4f} "
+                f"lr={current_lr:.8f}"
             )
 
-            # save history after every epoch so Ctrl+C still keeps progress
             history_df = pd.DataFrame(history)
             history_path = output_dir / "training_history.csv"
             history_df.to_csv(history_path, index=False, encoding="utf-8-sig")
@@ -248,9 +262,12 @@ class BertFineTuner:
         grad_clip: float,
         epoch: int,
         num_epochs: int,
-    ) -> float:
+    ) -> dict[str, float]:
         self.model.train()
+
         running_loss = 0.0
+        all_preds: list[int] = []
+        all_labels: list[int] = []
 
         progress_bar = tqdm(
             train_loader,
@@ -268,41 +285,99 @@ class BertFineTuner:
 
             outputs = self.model(**batch, labels=labels)
             loss = outputs.loss
-            loss.backward()
+            logits = outputs.logits
 
+            loss.backward()
             torch.nn.utils.clip_grad_norm_(self.model.parameters(), grad_clip)
 
             optimizer.step()
             scheduler.step()
 
+            preds = torch.argmax(logits, dim=-1)
+
             running_loss += float(loss.item())
+            all_preds.extend(preds.detach().cpu().tolist())
+            all_labels.extend(labels.detach().cpu().tolist())
+
             avg_loss = running_loss / max(1, (progress_bar.n + 1))
             progress_bar.set_postfix_str(f"loss={avg_loss:.4f}")
 
-        return running_loss / max(1, len(train_loader))
+        y_true = np.array(all_labels)
+        y_pred = np.array(all_preds)
 
-    def evaluate(self, df: pd.DataFrame) -> dict[str, float]:
-        predictions = self.predict(df["text"].tolist())
-        gold = df["label"].tolist()
-        pred = predictions.pred_label
-
-        gold_np = np.array(gold)
-        pred_np = np.array(pred)
-
-        accuracy = float((gold_np == pred_np).mean())
-
+        accuracy = float((y_true == y_pred).mean()) if len(y_true) > 0 else 0.0
         macro_precision, macro_recall, macro_f1 = self._macro_prf(
-            y_true=gold_np,
-            y_pred=pred_np,
+            y_true=y_true,
+            y_pred=y_pred,
             labels=[0, 1, 2],
         )
 
         return {
+            "loss": running_loss / max(1, len(train_loader)),
             "accuracy": accuracy,
             "macro_precision": macro_precision,
             "macro_recall": macro_recall,
             "macro_f1": macro_f1,
         }
+
+    def _evaluate_loader(
+        self,
+        data_loader: torch.utils.data.DataLoader,
+        desc: str = "Evaluating",
+    ) -> dict[str, float]:
+        self.model.eval()
+
+        running_loss = 0.0
+        all_preds: list[int] = []
+        all_labels: list[int] = []
+
+        progress_bar = tqdm(
+            data_loader,
+            total=len(data_loader),
+            desc=desc,
+            unit="batch",
+        )
+
+        with torch.inference_mode():
+            for batch in progress_bar:
+                labels = batch.pop("labels").to(self.device)
+                batch.pop("ids", None)
+                batch = {key: value.to(self.device) for key, value in batch.items()}
+
+                outputs = self.model(**batch, labels=labels)
+                loss = outputs.loss
+                logits = outputs.logits
+
+                preds = torch.argmax(logits, dim=-1)
+
+                running_loss += float(loss.item())
+                all_preds.extend(preds.detach().cpu().tolist())
+                all_labels.extend(labels.detach().cpu().tolist())
+
+                avg_loss = running_loss / max(1, (progress_bar.n + 1))
+                progress_bar.set_postfix_str(f"loss={avg_loss:.4f}")
+
+        y_true = np.array(all_labels)
+        y_pred = np.array(all_preds)
+
+        accuracy = float((y_true == y_pred).mean()) if len(y_true) > 0 else 0.0
+        macro_precision, macro_recall, macro_f1 = self._macro_prf(
+            y_true=y_true,
+            y_pred=y_pred,
+            labels=[0, 1, 2],
+        )
+
+        return {
+            "loss": running_loss / max(1, len(data_loader)),
+            "accuracy": accuracy,
+            "macro_precision": macro_precision,
+            "macro_recall": macro_recall,
+            "macro_f1": macro_f1,
+        }
+
+    def evaluate(self, df: pd.DataFrame) -> dict[str, float]:
+        data_loader = self._build_loader(df, shuffle=False)
+        return self._evaluate_loader(data_loader, desc="Evaluating")
 
     @staticmethod
     def _macro_prf(
