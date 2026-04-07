@@ -1,8 +1,7 @@
-"""Fine-tuned BERT training + evaluation entry script."""
-
 from __future__ import annotations
 
 import argparse
+import re
 from pathlib import Path
 
 import pandas as pd
@@ -46,10 +45,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-train-samples", type=int, default=None)
     parser.add_argument("--max-valid-samples", type=int, default=None)
     parser.add_argument("--max-test-samples", type=int, default=None)
+    parser.add_argument("--seed", type=int, default=42)
     parser.add_argument(
         "--output-dir",
         default=None,
-        help="Optional output directory. Defaults to outputs/bert_finetune/test/",
+        help="Optional output directory. If omitted, auto-generates a parameter-named folder.",
     )
     parser.add_argument(
         "--device",
@@ -77,6 +77,39 @@ def load_split_csv(path: str, max_samples: int | None = None) -> pd.DataFrame:
     return df
 
 
+def safe_name(value: str) -> str:
+    return re.sub(r"[^A-Za-z0-9._-]+", "_", value)
+
+
+def build_parameter_output_name(args: argparse.Namespace) -> str:
+    model_part = safe_name(args.model_name)
+    lr_part = f"lr{args.learning_rate:g}"
+    bs_part = f"bs{args.batch_size}"
+    ep_part = f"ep{args.epochs}"
+    ml_part = f"len{args.max_length}"
+    wd_part = f"wd{args.weight_decay:g}"
+    seed_part = f"seed{args.seed}"
+
+    parts = [
+        model_part,
+        lr_part,
+        bs_part,
+        ep_part,
+        ml_part,
+        wd_part,
+        seed_part,
+    ]
+
+    if args.max_train_samples is not None:
+        parts.append(f"train{args.max_train_samples}")
+    if args.max_valid_samples is not None:
+        parts.append(f"valid{args.max_valid_samples}")
+    if args.max_test_samples is not None:
+        parts.append(f"test{args.max_test_samples}")
+
+    return "_".join(parts)
+
+
 def main() -> None:
     args = parse_args()
 
@@ -89,7 +122,14 @@ def main() -> None:
     print(f"Valid samples: {len(valid_df)}")
     print(f"Test samples: {len(test_df)}")
 
-    output_dir = build_output_dir(args.output_dir, "bert_finetune", "test")
+    if args.output_dir is not None:
+        output_dir = Path(args.output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+    else:
+        run_name = build_parameter_output_name(args)
+        output_dir = Path("outputs") / "bert_finetune" / run_name
+        output_dir.mkdir(parents=True, exist_ok=True)
+
     checkpoint_dir = output_dir / "best_checkpoint"
 
     print(f"Output directory: {output_dir}")
@@ -102,6 +142,7 @@ def main() -> None:
         learning_rate=args.learning_rate,
         weight_decay=args.weight_decay,
         device=args.device,
+        seed=args.seed,
     )
 
     print(f"Model: {args.model_name}")
@@ -110,6 +151,7 @@ def main() -> None:
     print(f"Max length: {args.max_length}")
     print(f"Learning rate: {args.learning_rate}")
     print(f"Weight decay: {args.weight_decay}")
+    print(f"Seed: {args.seed}")
 
     print("[3/7] Starting fine-tuning.")
     train_summary = trainer.train(
@@ -126,6 +168,7 @@ def main() -> None:
         batch_size=args.batch_size,
         max_length=args.max_length,
         device=args.device,
+        seed=args.seed,
     )
 
     print("[5/7] Running test prediction.")
@@ -163,6 +206,12 @@ def main() -> None:
                 f"best_valid_macro_f1={train_summary['best_valid_macro_f1']:.6f}",
                 f"best_checkpoint_dir={train_summary['best_checkpoint_dir']}",
                 f"train_history_path={train_summary['history_path']}",
+                f"batch_size={args.batch_size}",
+                f"epochs={args.epochs}",
+                f"max_length={args.max_length}",
+                f"learning_rate={args.learning_rate}",
+                f"weight_decay={args.weight_decay}",
+                f"seed={args.seed}",
             ]
         ),
         encoding="utf-8",

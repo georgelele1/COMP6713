@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+import os
+import random
 
 import numpy as np
 import pandas as pd
@@ -24,6 +26,20 @@ class BertPredictionBatch:
     pred_text: list[str]
     confidence: list[float]
     raw_prediction_text: list[str]
+
+
+def set_global_seed(seed: int) -> None:
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
 
 class SentimentTextDataset(Dataset):
@@ -55,13 +71,17 @@ class BertFineTuner:
         learning_rate: float = 2e-5,
         weight_decay: float = 0.01,
         device: str | None = None,
+        seed: int = 42,
     ) -> None:
         self.model_name = model_name
         self.batch_size = batch_size
         self.max_length = max_length
         self.learning_rate = learning_rate
         self.weight_decay = weight_decay
+        self.seed = seed
         self.device = self._resolve_device(device)
+
+        set_global_seed(self.seed)
 
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.model = AutoModelForSequenceClassification.from_pretrained(
@@ -116,11 +136,15 @@ class BertFineTuner:
             encoded["ids"] = ids
             return encoded
 
+        generator = torch.Generator()
+        generator.manual_seed(self.seed)
+
         return torch.utils.data.DataLoader(
             dataset,
             batch_size=self.batch_size,
             shuffle=shuffle,
             collate_fn=collate_fn,
+            generator=generator,
         )
 
     def train(
@@ -136,7 +160,6 @@ class BertFineTuner:
         output_dir.mkdir(parents=True, exist_ok=True)
 
         train_loader = self._build_loader(train_df, shuffle=True)
-        valid_loader = self._build_loader(valid_df, shuffle=False)
 
         optimizer = torch.optim.AdamW(
             self.model.parameters(),
@@ -188,6 +211,11 @@ class BertFineTuner:
                 f"valid_accuracy={valid_metrics['accuracy']:.4f} "
                 f"valid_macro_f1={valid_metrics['macro_f1']:.4f}"
             )
+
+            # save history after every epoch so Ctrl+C still keeps progress
+            history_df = pd.DataFrame(history)
+            history_path = output_dir / "training_history.csv"
+            history_df.to_csv(history_path, index=False, encoding="utf-8-sig")
 
             if valid_macro_f1 > best_valid_f1:
                 best_valid_f1 = valid_macro_f1
@@ -367,6 +395,7 @@ class BertFineTuner:
         batch_size: int = 16,
         max_length: int = 256,
         device: str | None = None,
+        seed: int = 42,
     ) -> "BertFineTuner":
         model_dir = Path(model_dir)
         instance = cls(
@@ -374,6 +403,7 @@ class BertFineTuner:
             batch_size=batch_size,
             max_length=max_length,
             device=device,
+            seed=seed,
         )
         instance.tokenizer = AutoTokenizer.from_pretrained(model_dir)
         instance.model = AutoModelForSequenceClassification.from_pretrained(model_dir)
