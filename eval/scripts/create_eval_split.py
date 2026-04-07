@@ -45,9 +45,9 @@ def parse_args() -> argparse.Namespace:
         help="Directory where train.csv, valid.csv, and test.csv will be written.",
     )
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--train-ratio", type=float, default=0.8)
-    parser.add_argument("--valid-ratio", type=float, default=0.1)
-    parser.add_argument("--test-ratio", type=float, default=0.1)
+    parser.add_argument("--train-ratio", type=float, default=0.92)
+    parser.add_argument("--valid-ratio", type=float, default=0.04)
+    parser.add_argument("--test-ratio", type=float, default=0.04)
     return parser.parse_args()
 
 
