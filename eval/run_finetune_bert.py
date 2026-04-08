@@ -46,6 +46,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-valid-samples", type=int, default=None)
     parser.add_argument("--max-test-samples", type=int, default=None)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--dropout", type=float, default=0.0)
     parser.add_argument(
         "--output-dir",
         default=None,
@@ -205,6 +206,7 @@ def main() -> None:
         weight_decay=args.weight_decay,
         device=args.device,
         seed=args.seed,
+        dropout=args.dropout,
     )
 
     print(f"Model: {args.model_name}")

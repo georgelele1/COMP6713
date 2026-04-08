@@ -12,6 +12,7 @@ import torch
 from torch.utils.data import Dataset
 from tqdm.auto import tqdm
 from transformers import (
+    AutoConfig,
     AutoModelForSequenceClassification,
     AutoTokenizer,
     DataCollatorWithPadding,
@@ -72,6 +73,7 @@ class BertFineTuner:
         weight_decay: float = 0.01,
         device: str | None = None,
         seed: int = 42,
+        dropout: float = 0.1,
     ) -> None:
         self.model_name = model_name
         self.batch_size = batch_size
@@ -80,12 +82,19 @@ class BertFineTuner:
         self.weight_decay = weight_decay
         self.seed = seed
         self.device = self._resolve_device(device)
+        self.dropout = dropout
 
         set_global_seed(self.seed)
 
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+        config = AutoConfig.from_pretrained(model_name)
+        config.hidden_dropout_prob = self.dropout
+        config.attention_probs_dropout_prob = self.dropout
+
         self.model = AutoModelForSequenceClassification.from_pretrained(
             model_name,
+            config=config,
             num_labels=3,
             id2label={0: "negative", 1: "positive", 2: "neutral"},
             label2id={"negative": 0, "positive": 1, "neutral": 2},
