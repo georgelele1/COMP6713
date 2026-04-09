@@ -8,3 +8,18 @@ venv/
 .env/
 .DS_Store
 .idea/
+
+# allow experiment outputs
+!outputs/
+!outputs/bert_finetune/
+!outputs/bert_finetune/**
+
+# but still ignore checkpoints
+outputs/**/best_checkpoint/
+outputs/**/best_checkpoint/**
+
+# explicitly allow result artifacts in outputs
+!outputs/**/*.csv
+!outputs/**/*.json
+!outputs/**/*.txt
+!outputs/**/*.png

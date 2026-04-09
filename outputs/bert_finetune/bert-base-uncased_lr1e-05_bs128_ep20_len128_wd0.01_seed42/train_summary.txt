@@ -1,0 +1,11 @@
+model_name=bert-base-uncased
+best_epoch=6
+best_valid_macro_f1=0.939385
+best_checkpoint_dir=outputs\bert_finetune\bert-base-uncased_lr1e-05_bs128_ep20_len128_wd0.01_seed42\best_checkpoint
+train_history_path=outputs\bert_finetune\bert-base-uncased_lr1e-05_bs128_ep20_len128_wd0.01_seed42\training_history.csv
+batch_size=128
+epochs=20
+max_length=128
+learning_rate=1e-05
+weight_decay=0.01
+seed=42

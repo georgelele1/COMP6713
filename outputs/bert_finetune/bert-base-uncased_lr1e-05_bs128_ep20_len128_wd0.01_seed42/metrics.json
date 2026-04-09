@@ -1,0 +1,11 @@
+{
+  "accuracy": 0.9438846269481811,
+  "macro_precision": 0.9339699641299447,
+  "macro_recall": 0.9409509577540153,
+  "macro_f1": 0.9371388470901145,
+  "weighted_precision": 0.9451756682167751,
+  "weighted_recall": 0.9438846269481811,
+  "weighted_f1": 0.9442910397142241,
+  "num_examples": 103109,
+  "model_name": "bert_finetune"
+}
