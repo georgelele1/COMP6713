@@ -89,15 +89,15 @@ class BertFineTuner:
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
 
         config = AutoConfig.from_pretrained(model_name)
+        config.num_labels = 3
+        config.id2label = {0: "negative", 1: "positive", 2: "neutral"}
+        config.label2id = {"negative": 0, "positive": 1, "neutral": 2}
         config.hidden_dropout_prob = self.dropout
         config.attention_probs_dropout_prob = self.dropout
 
         self.model = AutoModelForSequenceClassification.from_pretrained(
             model_name,
             config=config,
-            num_labels=3,
-            id2label={0: "negative", 1: "positive", 2: "neutral"},
-            label2id={"negative": 0, "positive": 1, "neutral": 2},
         )
         self.model.to(self.device)
 
