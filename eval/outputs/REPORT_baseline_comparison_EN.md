@@ -66,7 +66,7 @@ The most critical issue appears in the `neutral` class. The BERT baseline reache
 
 ## 5. Prediction Distribution, Confusion Matrix, and Class Bias Analysis
 
-Using the two [predictions.csv](/D:/PyCharmProjects/comment_sa/outputs/bert_baseline/test/predictions.csv) files and the corresponding [confusion_matrix_raw.png](/D:/PyCharmProjects/comment_sa/outputs/bert_baseline/test/confusion_matrix_raw.png) and [confusion_matrix_raw.png](/D:/PyCharmProjects/comment_sa/outputs/flan_t5_baseline/test/confusion_matrix_raw.png), it is possible to analyze the class bias of the two models more completely. Prediction distribution alone shows which labels a model prefers to produce, while the confusion matrix shows which true classes are being pushed into which predicted classes.
+Prediction distribution alone shows which labels a model prefers to produce, while the confusion matrix shows which true classes are being pushed into which predicted classes, this enables a more comprehensive observation of the category bias issues of the two models.
 
 ### 5.1 BERT Baseline
 
