@@ -66,7 +66,7 @@
 
 ## 5. 预测分布、混淆矩阵与类别偏置分析
 
-根据两组 [predictions.csv](/D:/PyCharmProjects/comment_sa/outputs/bert_baseline/test/predictions.csv) 和 [predictions.csv](/D:/PyCharmProjects/comment_sa/outputs/flan_t5_baseline/test/predictions.csv)，以及对应的 [confusion_matrix_raw.png](/D:/PyCharmProjects/comment_sa/outputs/bert_baseline/test/confusion_matrix_raw.png) 和 [confusion_matrix_raw.png](/D:/PyCharmProjects/comment_sa/outputs/flan_t5_baseline/test/confusion_matrix_raw.png)，可以更完整地观察两个模型的类别偏置问题。单看预测分布只能看出模型“更愿意输出什么标签”，而结合混淆矩阵后，才能进一步判断模型“究竟把哪些真实类别压向了哪些预测类别”。
+单看预测分布只能看出模型“更愿意输出什么标签”，而结合混淆矩阵后，才能进一步判断模型“究竟把哪些真实类别压向了哪些预测类别”，从而更完整地观察两个模型的类别偏置问题。
 
 ### 5.1 BERT baseline
 
