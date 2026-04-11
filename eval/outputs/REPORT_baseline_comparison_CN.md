@@ -28,8 +28,6 @@
 
 ## 3. 总体量化结果对比
 
-根据 [bert_baseline/test/metrics.json](/D:/PyCharmProjects/comment_sa/outputs/bert_baseline/test/metrics.json) 与 [flan_t5_baseline/test/metrics.json](/D:/PyCharmProjects/comment_sa/outputs/flan_t5_baseline/test/metrics.json)，结果如下。
-
 | Model | Accuracy | Macro Precision | Macro Recall | Macro F1 | Weighted F1 | Test Samples |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | `nlptown/bert-base-multilingual-uncased-sentiment` | 0.5078 | 0.4740 | 0.4729 | 0.4730 | 0.5110 | 257,771 |
@@ -46,8 +44,6 @@
 ---
 
 ## 4. 分类别结果对比
-
-根据 [bert_baseline/test/per_class_metrics.csv](/D:/PyCharmProjects/comment_sa/outputs/bert_baseline/test/per_class_metrics.csv) 与 [flan_t5_baseline/test/per_class_metrics.csv](/D:/PyCharmProjects/comment_sa/outputs/flan_t5_baseline/test/per_class_metrics.csv)，结果如下。
 
 | Model | Negative F1 | Positive F1 | Neutral F1 |
 | --- | ---: | ---: | ---: |
