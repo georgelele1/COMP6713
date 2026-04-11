@@ -28,8 +28,6 @@ The other baseline route in this project is `google/flan-t5-base`, which is a pr
 
 ## 3. Overall Quantitative Results
 
-According to [bert_baseline/test/metrics.json](/D:/PyCharmProjects/comment_sa/outputs/bert_baseline/test/metrics.json) and [flan_t5_baseline/test/metrics.json](/D:/PyCharmProjects/comment_sa/outputs/flan_t5_baseline/test/metrics.json), the results are as follows.
-
 | Model | Accuracy | Macro Precision | Macro Recall | Macro F1 | Weighted F1 | Test Samples |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | `nlptown/bert-base-multilingual-uncased-sentiment` | 0.5078 | 0.4740 | 0.4729 | 0.4730 | 0.5110 | 257,771 |
@@ -46,8 +44,6 @@ However, the situation changes when `Macro F1` is examined. The BERT baseline ac
 ---
 
 ## 4. Per-Class Results
-
-According to [bert_baseline/test/per_class_metrics.csv](/D:/PyCharmProjects/comment_sa/outputs/bert_baseline/test/per_class_metrics.csv) and [flan_t5_baseline/test/per_class_metrics.csv](/D:/PyCharmProjects/comment_sa/outputs/flan_t5_baseline/test/per_class_metrics.csv), the results are as follows.
 
 | Model | Negative F1 | Positive F1 | Neutral F1 |
 | --- | ---: | ---: | ---: |
