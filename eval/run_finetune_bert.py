@@ -57,6 +57,18 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Optional torch device override such as cuda, cuda:0, or cpu.",
     )
+    parser.add_argument(
+        "--scheduler-type",
+        default="linear",
+        choices=["linear", "cosine"],
+        help="Learning rate scheduler type.",
+    )
+    parser.add_argument(
+        "--warmup-ratio",
+        type=float,
+        default=0.1,
+        help="Warmup ratio used by the scheduler.",
+    )
     return parser.parse_args()
 
 
@@ -207,6 +219,8 @@ def main() -> None:
         device=args.device,
         seed=args.seed,
         dropout=args.dropout,
+        scheduler_type=args.scheduler_type,
+        warmup_ratio=args.warmup_ratio,
     )
 
     print(f"Model: {args.model_name}")
@@ -216,6 +230,8 @@ def main() -> None:
     print(f"Learning rate: {args.learning_rate}")
     print(f"Weight decay: {args.weight_decay}")
     print(f"Seed: {args.seed}")
+    print(f"Scheduler type: {args.scheduler_type}")
+    print(f"Warmup ratio: {args.warmup_ratio}")
 
     print("[3/8] Starting fine-tuning.")
     train_summary = trainer.train(
@@ -285,6 +301,8 @@ def main() -> None:
                 f"learning_rate={args.learning_rate}",
                 f"weight_decay={args.weight_decay}",
                 f"seed={args.seed}",
+                f"scheduler_type={args.scheduler_type}",
+                f"warmup_ratio={args.warmup_ratio}",
             ]
         ),
         encoding="utf-8",

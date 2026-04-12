@@ -16,6 +16,8 @@ from transformers import (
     AutoModelForSequenceClassification,
     AutoTokenizer,
     DataCollatorWithPadding,
+    get_cosine_schedule_with_warmup,
+    get_linear_schedule_with_warmup,
 )
 
 from baseline.constants import LABEL_ID_TO_NAME
@@ -74,6 +76,8 @@ class BertFineTuner:
         device: str | None = None,
         seed: int = 42,
         dropout: float = 0.1,
+        scheduler_type: str = "linear",
+        warmup_ratio: float = 0.1,
     ) -> None:
         self.model_name = model_name
         self.batch_size = batch_size
@@ -83,6 +87,8 @@ class BertFineTuner:
         self.seed = seed
         self.device = self._resolve_device(device)
         self.dropout = dropout
+        self.scheduler_type = scheduler_type
+        self.warmup_ratio = warmup_ratio
 
         set_global_seed(self.seed)
 
@@ -178,12 +184,22 @@ class BertFineTuner:
         )
 
         total_steps = len(train_loader) * epochs
-        scheduler = torch.optim.lr_scheduler.LinearLR(
-            optimizer,
-            start_factor=1.0,
-            end_factor=0.0,
-            total_iters=max(total_steps, 1),
-        )
+        num_warmup_steps = int(self.warmup_ratio * total_steps)
+
+        if self.scheduler_type == "cosine":
+            scheduler = get_cosine_schedule_with_warmup(
+                optimizer,
+                num_warmup_steps=num_warmup_steps,
+                num_training_steps=total_steps,
+            )
+        elif self.scheduler_type == "linear":
+            scheduler = get_linear_schedule_with_warmup(
+                optimizer,
+                num_warmup_steps=num_warmup_steps,
+                num_training_steps=total_steps,
+            )
+        else:
+            raise ValueError(f"Unsupported scheduler_type: {self.scheduler_type}")
 
         history: list[dict[str, float]] = []
         best_valid_f1 = -1.0
