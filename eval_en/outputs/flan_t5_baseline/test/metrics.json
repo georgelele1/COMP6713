@@ -1,0 +1,11 @@
+{
+  "accuracy": 0.5945626156549806,
+  "macro_precision": 0.5126687655379122,
+  "macro_recall": 0.503295285880479,
+  "macro_f1": 0.4512958810927381,
+  "weighted_precision": 0.5416511709441948,
+  "weighted_recall": 0.5945626156549806,
+  "weighted_f1": 0.5262927735110656,
+  "num_examples": 257771,
+  "model_name": "flan_t5_baseline"
+}
