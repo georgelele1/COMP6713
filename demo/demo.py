@@ -7,8 +7,10 @@ This demo compares:
  3. Fine-tuned models
 
 
-Fine-tuned models are not included due to size limit.
-Please download models and place them in:
+Models are not included due to size limit.
+If the "models" directory does not exist in the specified path, please create it manually. 
+Then download the required model files and place them into the "models" folder before running the program.
+Please download models and place them in: 
   models/finetuned_bert/
   models/finetuned_xlmr/
   (see README for details)
