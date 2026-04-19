@@ -7,10 +7,8 @@ This demo compares:
  3. Fine-tuned models
 
 
-Models are not included due to size limit.
-If the "models" directory does not exist in the specified path, please create it manually. 
-Then download the required model files and place them into the "models" folder before running the program.
-Please download models and place them in: 
+Fine-tuned models are not included due to size limit.
+Please download models and place them in:
   models/finetuned_bert/
   models/finetuned_xlmr/
   (see README for details)
@@ -24,7 +22,12 @@ import re
 import sys
 from pathlib import Path
 
+BASE_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = BASE_DIR.parent
+EVAL_EN_DIR = PROJECT_ROOT / "eval_en"
 
+if str(EVAL_EN_DIR) not in sys.path:
+    sys.path.insert(0, str(EVAL_EN_DIR))
 
 import gradio as gr
 import torch
@@ -42,12 +45,7 @@ except Exception:
 
 
 
-BASE_DIR = Path(__file__).resolve().parent
-PROJECT_ROOT = BASE_DIR.parent
-EVAL_EN_DIR = PROJECT_ROOT / "eval_en"
 
-if str(EVAL_EN_DIR) not in sys.path:
-    sys.path.insert(0, str(EVAL_EN_DIR))
 
 
 APP_TITLE = "Sentiment Classification Demo"
