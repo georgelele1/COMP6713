@@ -122,6 +122,7 @@ The merged CSV must be placed at `eval/dataset/merged_sentiment_clean.csv` befor
 - Python 3.10
 - PyTorch (install separately before `requirements.txt`)
 - Conda (recommended)
+- gradio
 
 ### Installation
 
@@ -310,7 +311,59 @@ python run_finetune_bert.py \
 ---
 
 ## Demo
+### Demo Setup
 
+The demo is implemented with Gradio and allows interactive comparison of multiple models.
+
+#### Additional dependencies
+
+If not already included, install:
+
+```bash
+pip install gradio nltk
+```
+#### Model Setup
+Due to size limits, models are NOT included in this repository.
+
+You need to download models and place them in the following structure:
+
+models/
+ ├── bert/
+ ├── T5/
+ ├── finetuned_bert/
+ └── finetuned_xlmr/
+
+
+---
+
+#### Pre-trained Models (HuggingFace)
+
+Download using:
+
+**BERT** huggingface-cli download nlptown/bert-base-multilingual-uncased-sentiment --local-dir models/bert/nlptown_bert-base-multilingual-uncased-sentiment
+
+**FLAN-T5** huggingface-cli download google/flan-t5-base --local-dir models/T5/google_flan-t5-base
+
+---
+
+####  Fine-tuned Models
+
+Download from Google Drive:
+
+- Fine-tuned BERT:
+[PUT YOUR LINK HERE]
+
+- Fine-tuned XLM-RoBERTa:
+[PUT YOUR LINK HERE]
+
+After downloading, place them as:
+
+models/finetuned_bert/
+models/finetuned_xlmr/
+
+---
+
+ ###  Run the Demo
 The demo app uses [Gradio](https://gradio.app) to compare all models side-by-side in a browser interface.
 
 ```bash
