@@ -326,24 +326,29 @@ pip install gradio nltk
 Due to size limits, models are NOT included in this repository.
 
 You need to download models and place them in the following structure:
-
-models/
- ├── bert/
- ├── T5/
- ├── finetuned_bert/
- └── finetuned_xlmr/
-
+```
+COMP6713/
+├──demo
+    ├──demo.py 
+    ├── models/
+          ├── bert/
+          ├── T5/
+          ├── finetuned_bert/
+          └── finetuned_xlmr/
+```
 
 ---
 
 #### Pre-trained Models (HuggingFace)
-
+```bash
+cd demo
+```
 Download using:
+```bash
+huggingface-cli download nlptown/bert-base-multilingual-uncased-sentiment --local-dir models/bert/nlptown_bert-base-multilingual-uncased-sentiment
 
-**BERT** huggingface-cli download nlptown/bert-base-multilingual-uncased-sentiment --local-dir models/bert/nlptown_bert-base-multilingual-uncased-sentiment
-
-**FLAN-T5** huggingface-cli download google/flan-t5-base --local-dir models/T5/google_flan-t5-base
-
+huggingface-cli download google/flan-t5-base --local-dir models/T5/google_flan-t5-base
+```
 ---
 
 ####  Fine-tuned Models
@@ -351,15 +356,14 @@ Download using:
 Download from Google Drive:
 
 - Fine-tuned BERT:
-[PUT YOUR LINK HERE]
+[Fine-tuned BERT](https://drive.google.com/file/d/1726NCrXVSYDVsVUx9QAm3wVgDQmOX2oc/view?usp=drive_link)
 
 - Fine-tuned XLM-RoBERTa:
-[PUT YOUR LINK HERE]
+  [Fine-tuned XLM-RoBERTa](https://drive.google.com/file/d/1Ho5EbJcAU6d7A-2SPHJitS_A46EFPLzP/view?usp=drive_link)
 
-After downloading, place them as:
+After downloading, place them as demo/models/
 
-models/finetuned_bert/
-models/finetuned_xlmr/
+
 
 ---
 
@@ -372,6 +376,12 @@ python demo.py
 ```
 
 Then open `http://127.0.0.1:7860` in your browser.
+ **Notes**
+- If port 7860 is occupied, change port:
+```bash
+python demo.py --port 7861
+```
+- The demo compares predictions across all models interactively.
 
 **Options:**
 
