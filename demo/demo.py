@@ -44,12 +44,7 @@ except Exception:
     opinion_lexicon = None
 
 
-
-
-
-
 APP_TITLE = "Sentiment Classification Demo"
-
 
 LABEL_ID_TO_NAME = {
     0: "negative",
@@ -58,11 +53,43 @@ LABEL_ID_TO_NAME = {
 }
 
 MODELS_DIR = BASE_DIR / "models"
+EVAL_DIR = PROJECT_ROOT / "eval_en"
+MODEL_CACHE = {}
 
-DEFAULT_BERT_DIR = MODELS_DIR / "bert/nlptown_bert-base-multilingual-uncased-sentiment"
-DEFAULT_T5_DIR = MODELS_DIR / "T5/google_flan-t5-base"
-DEFAULT_FINETUNED_BERT_DIR = MODELS_DIR / "finetuned_bert"
-DEFAULT_FINETUNED_XLMR_DIR = MODELS_DIR / "finetuned_xlmr"
+# DEFAULT_BERT_DIR = MODELS_DIR / "bert/nlptown_bert-base-multilingual-uncased-sentiment"
+# DEFAULT_T5_DIR = MODELS_DIR / "T5/google_flan-t5-base"
+# DEFAULT_FINETUNED_BERT_DIR = MODELS_DIR / "finetuned_bert"
+# DEFAULT_FINETUNED_XLMR_DIR = MODELS_DIR / "finetuned_xlmr"
+
+
+def find_model_dir(*candidates: str | Path) -> Path | None:
+    for candidate in candidates:
+        p = Path(candidate)
+        if p.exists() and p.is_dir():
+            return p
+    return None
+
+
+
+DEFAULT_BERT_DIR = find_model_dir(
+    MODELS_DIR / "bert/nlptown_bert-base-multilingual-uncased-sentiment",
+    EVAL_DIR / "bert/nlptown_bert-base-multilingual-uncased-sentiment",
+) or (MODELS_DIR / "bert/nlptown_bert-base-multilingual-uncased-sentiment")
+
+DEFAULT_T5_DIR = find_model_dir(
+    MODELS_DIR / "T5/google_flan-t5-base",
+    EVAL_DIR / "T5/google_flan-t5-base",
+) or (MODELS_DIR / "T5/google_flan-t5-base")
+
+DEFAULT_FINETUNED_BERT_DIR = find_model_dir(
+    MODELS_DIR / "finetuned_bert",
+    EVAL_DIR / "finetuned_bert",
+) or (MODELS_DIR / "finetuned_bert")
+
+DEFAULT_FINETUNED_XLMR_DIR = find_model_dir(
+    MODELS_DIR / "finetuned_xlmr",
+    EVAL_DIR / "finetuned_xlmr",
+) or (MODELS_DIR / "finetuned_xlmr")
 
 EXAMPLES = [
     " Just sang 'Shine' by Newsboys in the car with my kids.",
@@ -71,7 +98,6 @@ EXAMPLES = [
     "Siento que siempre sospecho."
 ]
 
-MODEL_CACHE = {}
 
 
 def get_device(device_name: str | None):
@@ -83,10 +109,18 @@ def get_device(device_name: str | None):
     return torch.device("cpu")
 
 
+
+
 # Check if model folder exists and contains required config
 def model_exists(model_dir: str | Path):
     model_dir = Path(model_dir)
-    return model_dir.exists() and model_dir.is_dir() and (model_dir / "config.json").exists()
+    if not model_dir.exists() or not model_dir.is_dir():
+        return False
+
+    return (
+        (model_dir / "config.json").exists()
+        or (model_dir / "tokenizer_config.json").exists()
+    )
 
 
 def clean_text(text: str):
