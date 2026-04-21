@@ -57,8 +57,8 @@ COMP6713/
 ├── outputs/                    # Top-level output directory
 │
 ├── demo/
-│   └── demo.py                 # Gradio demo app (compares all models)
-│   
+│   ├──demo.py                 # Gradio demo app (compares all models)
+│   └── models/
 │
 └── eval/
     ├── baseline/               # Core inference package
@@ -339,7 +339,7 @@ You need to download models and place them in the following structure:
 COMP6713/
 ├──demo
     ├──demo.py 
-    ├── models/
+    └── models/
           ├── bert/
           ├── T5/
           ├── finetuned_bert/
