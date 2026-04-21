@@ -1,5 +1,12 @@
 # COMP6713 — Sentiment Analysis Project
 
+Siyi Ge (z5517960)
+Yihang Guo(z5609154)
+Gaowang Zou(z5445224)
+Yanbo Wang (z5603812)
+Yiming Xiong(z5679311)
+
+
 A sentiment analysis system that classifies text into **negative**, **positive**, and **neutral** categories. The project benchmarks two pre-trained baselines (BERT and FLAN-T5) against a fine-tuned BERT model, using a merged dataset drawn from two public sources.
 
 ---
