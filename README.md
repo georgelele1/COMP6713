@@ -57,7 +57,7 @@ COMP6713/
 ├── outputs/                    # Top-level output directory
 │
 ├── demo/
-│   ├── demo.py                 # Gradio demo app (compares all models)
+│   └── demo.py                 # Gradio demo app (compares all models)
 │   
 │
 └── eval/
