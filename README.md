@@ -129,6 +129,9 @@ The merged CSV must be placed at `eval/dataset/merged_sentiment_clean.csv` befor
 - PyTorch (install separately before `requirements.txt`)
 - Conda (recommended)
 - gradio
+- torch
+- transformers
+
 
 ### Installation
 
