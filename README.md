@@ -58,7 +58,7 @@ COMP6713/
 │
 ├── demo/
 │   ├── demo.py                 # Gradio demo app (compares all models)
-│   └── Readme_demo.md
+│   
 │
 └── eval/
     ├── baseline/               # Core inference package
