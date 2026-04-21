@@ -47,7 +47,6 @@ COMP6713/
 ├── dataset_analysis.py         # Exploratory data analysis
 ├── baseline.ipynb              # Notebook for baseline experiments
 ├── Sentiment_Word_Counting.py  # Rule-based sentiment counting
-├── TF-IDF_Baseline.py          # TF-IDF baseline
 ├── outputs/                    # Top-level output directory
 │
 ├── demo/
