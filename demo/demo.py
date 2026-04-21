@@ -24,7 +24,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = BASE_DIR.parent
-EVAL_EN_DIR = PROJECT_ROOT / "eval_en"
+EVAL_EN_DIR = PROJECT_ROOT / "eval"
 
 if str(EVAL_EN_DIR) not in sys.path:
     sys.path.insert(0, str(EVAL_EN_DIR))
@@ -53,7 +53,7 @@ LABEL_ID_TO_NAME = {
 }
 
 MODELS_DIR = BASE_DIR / "models"
-EVAL_DIR = PROJECT_ROOT / "eval_en"
+EVAL_DIR = PROJECT_ROOT / "eval"
 MODEL_CACHE = {}
 
 # DEFAULT_BERT_DIR = MODELS_DIR / "bert/nlptown_bert-base-multilingual-uncased-sentiment"
