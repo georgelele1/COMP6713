@@ -326,7 +326,7 @@ The demo is implemented with Gradio and allows interactive comparison of multipl
 If not already included, install:
 
 ```bash
-pip install gradio nltk
+pip install torch transformers gradio nltk
 ```
 #### Model Setup
 Due to size limits, models are NOT included in this repository.
