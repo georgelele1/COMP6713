@@ -334,7 +334,10 @@ pip install torch transformers gradio nltk
 #### Model Setup
 Due to size limits, models are NOT included in this repository.
 
-You need to download models and place them in the following structure:
+You need to download the required models and place them in the following structure.
+
+If the `models/` folder does not exist, please create it inside the `demo/` directory.
+All models should be downloaded into this folder before running the demo to ensure it works properly.
 ```
 COMP6713/
 ├──demo
