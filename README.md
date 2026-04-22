@@ -50,8 +50,7 @@ All models are evaluated on the same fixed test set using Accuracy, Macro Precis
 
 ```
 COMP6713/
-├── Dataset.py                  # Builds and saves the merged dataset CSV
-├── dataset_analysis.py         # Exploratory data analysis
+├── dataset_analysis.py         # Builds and saves the merged dataset CSV and exploratory data analysis
 ├── baseline.ipynb              # Notebook for baseline experiments
 ├── Sentiment_Word_Counting.py  # Rule-based sentiment counting
 ├── outputs/                    # Top-level output directory
@@ -113,13 +112,8 @@ After merging, the pipeline deduplicates by text content and saves a clean CSV.
 
 ```bash
 # From the project root
-python Dataset.py
-# Output: merged_sentiment_clean.csv
+python dataset_analysis.py
 ```
-
-The merged CSV must be placed at `eval/dataset/merged_sentiment_clean.csv` before running the split script.
-
----
 
 ## Setup
 
